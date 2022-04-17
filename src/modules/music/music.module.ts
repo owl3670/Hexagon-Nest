@@ -6,6 +6,7 @@ import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MelonScraping } from './scraping/melon.scraping';
 import { MusicJsonDbRepository } from './infra/json-db';
+import { GenieScraping } from './scraping/genie.scraping';
 
 @Module({
   imports: [HttpModule, ScheduleModule.forRoot()],
@@ -13,7 +14,13 @@ import { MusicJsonDbRepository } from './infra/json-db';
     MusicService,
     ScrapingService,
     MelonScraping,
+    GenieScraping,
     MusicJsonDbRepository,
+    {
+      provide: 'Scraping',
+      useFactory: (melon, genie) => [melon, genie],
+      inject: [MelonScraping, GenieScraping],
+    },
   ],
   controllers: [MusicController],
 })

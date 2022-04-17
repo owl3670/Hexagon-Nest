@@ -29,7 +29,7 @@ export class MelonScraping implements IMusicScrapingPort {
     const $tr = $('tbody').children();
 
     const results: Music[] = [];
-    $tr.each((i, el) => {
+    for (const el of $tr) {
       const $td = $(el).children();
 
       const rank = $($td[1]).find('.rank').text();
@@ -37,31 +37,31 @@ export class MelonScraping implements IMusicScrapingPort {
       const singer = $($td[5]).find('.rank02 > a').text();
       const album = $($td[6]).find('.rank03 a').text();
 
-      const music = new Music({
+      const music = Music.createNew({
         ranking: +rank,
         name,
         singer,
         album,
       });
 
+      music.addId(`${this.vendor}${music.ranking}`);
+
       const albumId = $($td[6]).find('.rank03').html().split("'")[1];
 
-      const response = lastValueFrom(
+      const response = await lastValueFrom(
         this.httpService.get(
           `https://www.melon.com/album/detail.htm?albumId=${albumId}`,
         ),
       );
 
-      response
-        .then((res) => {
-          const $album = cheerio.load(res.data);
-          const publisher = $album('.list dd:nth-child(3)').text();
-          const agency = $album('.list dd:nth-child(4)').text();
-          music.addDetail({ publisher, agency, ...music });
+      const $album = cheerio.load(response.data);
+      const publisher = $album('.list dd:nth-child(3)').text();
+      const agency = $album('.list dd:nth-child(4)').text();
+      music.addDetail({ publisher, agency, ...music });
 
-          results.push(music);
-        })
-        .catch((err) => console.log(err));
-    });
+      results.push(music);
+    }
+
+    this.musicRepository.save(this.vendor, results);
   }
 }

@@ -10,7 +10,7 @@ import { IMusicRepository } from '../port/music.repository.port';
 import { IMusicScrapingPort } from '../port/music.scraping.port';
 
 @Injectable()
-export class MelonScraping implements IMusicScrapingPort {
+export class GenieScraping implements IMusicScrapingPort {
   private readonly vendor: Vendor = 'genie';
 
   constructor(
@@ -20,48 +20,64 @@ export class MelonScraping implements IMusicScrapingPort {
   ) {}
 
   async scrap(): Promise<void> {
-    const response = await lastValueFrom(
-      this.httpService.get('https://www.genie.co.kr/chart/top200'),
-    );
-
-    const $ = cheerio.load(response.data);
-
-    const $tr = $('tbody').children();
+    const responses = [];
+    for (let i = 1; i < 5; i++) {
+      const response = await lastValueFrom(
+        this.httpService.get(`https://www.genie.co.kr/chart/top200?pg=${i}`),
+      );
+      responses.push(response);
+    }
 
     const results: Music[] = [];
-    $tr.each((i, el) => {
-      const $td = $(el).children();
+    for (const response of responses) {
+      const $ = cheerio.load(response.data);
 
-      const rank = $($td[1]).find('.rank').text();
-      const name = $($td[5]).find('.rank01 a').text();
-      const singer = $($td[5]).find('.rank02 > a').text();
-      const album = $($td[6]).find('.rank03 a').text();
+      const $tr = $('tbody').children();
 
-      const music = new Music({
-        ranking: +rank,
-        name,
-        singer,
-        album,
-      });
+      for (const el of $tr) {
+        const $td = $(el).children();
 
-      const albumId = $($td[6]).find('.rank03').html().split("'")[1];
+        const rank = $($td[1]).children().remove().end().text();
+        const name = $($td[4])
+          .find('.title')
+          .children()
+          .remove()
+          .end()
+          .text()
+          .trim();
+        const singer = $($td[4]).find('.artist').text();
+        const album = $($td[4]).find('.albumtitle').text();
 
-      const response = lastValueFrom(
-        this.httpService.get(
-          `https://www.melon.com/album/detail.htm?albumId=${albumId}`,
-        ),
-      );
+        const music = Music.createNew({
+          ranking: +rank,
+          name,
+          singer,
+          album,
+        });
 
-      response
-        .then((res) => {
-          const $album = cheerio.load(res.data);
-          const publisher = $album('.list dd:nth-child(3)').text();
-          const agency = $album('.list dd:nth-child(4)').text();
-          music.addDetail({ publisher, agency, ...music });
+        music.addId(`${this.vendor}${music.ranking}`);
 
-          results.push(music);
-        })
-        .catch((err) => console.log(err));
-    });
+        const albumId = $($td[4])
+          .find('.albumtitle')
+          .attr('onclick')
+          .split("'")[1];
+
+        const response = await lastValueFrom(
+          this.httpService.get(
+            `https://www.genie.co.kr/detail/albumInfo?axnm=${albumId}`,
+          ),
+        );
+
+        const $album = cheerio.load(response.data);
+        const $span = $album('.album-detail-infos .info-data').find('.value');
+        const publisher = $span.eq(2).text();
+        const agency = $span.eq(3).text();
+        music.addDetail({ publisher, agency, ...music });
+
+        results.push(music);
+      }
+    }
+
+    this.musicRepository.save(this.vendor, results);
   }
 }

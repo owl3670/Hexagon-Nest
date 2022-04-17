@@ -15,16 +15,16 @@ export class MusicController {
 
   @Get(':vendor/song/:id')
   getDetailOne(@Param() params: MusicGetOneDto) {
-    return;
+    return this.musicService.getDetailOne(params);
   }
 
   @Get(':vendor/summary')
   getSummaries(@Param() params: MusicGetManyDto) {
-    return;
+    return this.musicService.getSummaries(params);
   }
 
   @Get(':vendor/songs')
   getSons(@Param() params: MusicGetManyDto) {
-    return;
+    return this.musicService.getSongs(params);
   }
 }

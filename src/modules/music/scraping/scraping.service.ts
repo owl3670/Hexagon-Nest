@@ -2,16 +2,15 @@ import { Inject } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { IMusicScrapingPort } from '../port/music.scraping.port';
-import { MelonScraping } from './melon.scraping';
 
 @Injectable()
 export class ScrapingService {
   constructor(
-    @Inject(MelonScraping) private readonly scrapingPort: IMusicScrapingPort,
+    @Inject('Scraping') private readonly scrapingPorts: IMusicScrapingPort[],
   ) {}
 
-  @Cron('*/5 * * * * * ')
+  @Cron('* */5 * * * * ')
   handleScrap() {
-    this.scrapingPort.scrap();
+    this.scrapingPorts.map((port) => port.scrap());
   }
 }

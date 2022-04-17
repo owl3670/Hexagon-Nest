@@ -13,8 +13,7 @@ export interface MusicDetail extends MusicSummary {
 }
 
 export class Music implements MusicDetail {
-  id: number;
-  vendor: Vendor;
+  id: string;
   publisher: string;
   agency: string;
   ranking: number;
@@ -44,8 +43,8 @@ export class Music implements MusicDetail {
     return this;
   }
 
-  addVendor(vendor: Vendor): Music {
-    this.vendor = vendor;
+  addId(id: string): Music {
+    this.id = id;
 
     return this;
   }

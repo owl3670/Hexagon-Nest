@@ -1,7 +1,7 @@
 import { MusicSummary } from 'src/modules/music/domain/music.entity';
 
-class MusicSummaryDto implements MusicSummary {
-  id: number;
+export class MusicSummaryDto implements MusicSummary {
+  id: string;
   ranking: number;
   name: string;
   singer: string;

@@ -3,7 +3,7 @@ import { Vendor } from '../domain/music.types';
 
 export interface IMusicRepository {
   save(vendor: Vendor, musics: Music[]);
-  getOne(id: number): Music;
+  getOne(vendor: Vendor, id: string): Music;
   getAll(vendor: Vendor): Music[];
   getUpdateTime(vendor: Vendor): Date;
 }
