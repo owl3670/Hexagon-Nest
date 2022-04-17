@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MusicModule } from './music/music.module';
+import { MusicModule } from './modules/music/music.module';
 
 @Module({
   imports: [MusicModule],

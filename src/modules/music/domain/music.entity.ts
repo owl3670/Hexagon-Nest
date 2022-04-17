@@ -31,7 +31,7 @@ export class Music implements MusicDetail {
     this.album = album;
   }
 
-  createNew(summary: MusicSummary): Music {
+  static createNew(summary: MusicSummary): Music {
     return new Music(summary);
   }
 
