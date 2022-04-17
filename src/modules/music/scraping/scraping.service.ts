@@ -10,7 +10,7 @@ export class ScrapingService {
     @Inject(MelonScraping) private readonly scrapingPort: IMusicScrapingPort,
   ) {}
 
-  @Cron('*/10 * * * * * ')
+  @Cron('*/5 * * * * * ')
   handleScrap() {
     this.scrapingPort.scrap();
   }
