@@ -9,7 +9,7 @@ export class ScrapingService {
     @Inject('Scraping') private readonly scrapingPorts: IMusicScrapingPort[],
   ) {}
 
-  @Cron('* */5 * * * * ')
+  @Cron('*/5 * * * * * ')
   handleScrap() {
     this.scrapingPorts.map((port) => port.scrap());
   }

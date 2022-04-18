@@ -28,7 +28,11 @@ export class MusicJsonDbRepository implements IMusicRepository {
   }
 
   getUpdateTime(vendor: Vendor): Date {
-    const data = this.db.getData(`/${vendor}/update_time`);
-    return new Date(data);
+    try {
+      const data = this.db.getData(`/${vendor}/update_time`);
+      return new Date(data);
+    } catch (err) {
+      return null;
+    }
   }
 }

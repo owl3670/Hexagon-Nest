@@ -20,6 +20,16 @@ export class MelonScraping implements IMusicScrapingPort {
   ) {}
 
   async scrap(): Promise<void> {
+    const update_time = this.musicRepository.getUpdateTime(this.vendor);
+    if (update_time) {
+      const now = new Date();
+      const elapsed = (now.getTime() - update_time.getMilliseconds()) / 1000;
+
+      if (elapsed < 30 * 60 * 1000) {
+        return;
+      }
+    }
+
     const response = await lastValueFrom(
       this.httpService.get('https://www.melon.com/chart/index.htm'),
     );

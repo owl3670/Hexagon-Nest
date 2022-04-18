@@ -11,7 +11,7 @@ import { IMusicScrapingPort } from '../port/music.scraping.port';
 
 @Injectable()
 export class GenieScraping implements IMusicScrapingPort {
-  private readonly vendor: Vendor = 'genie';
+  protected readonly vendor: Vendor = 'genie';
 
   constructor(
     @Inject(MusicJsonDbRepository)
@@ -20,6 +20,16 @@ export class GenieScraping implements IMusicScrapingPort {
   ) {}
 
   async scrap(): Promise<void> {
+    const update_time = this.musicRepository.getUpdateTime(this.vendor);
+    if (update_time) {
+      const now = new Date();
+      const elapsed = (now.getTime() - update_time.getMilliseconds()) / 1000;
+
+      if (elapsed < 30 * 60 * 1000) {
+        return;
+      }
+    }
+
     const responses = [];
     for (let i = 1; i < 5; i++) {
       const response = await lastValueFrom(
